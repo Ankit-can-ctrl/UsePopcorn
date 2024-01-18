@@ -53,38 +53,50 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
+  const [query, setQuery] = useState("");
+
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const query = "sdsdsa";
+  const tempQuery = "avatar";
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${Key}&s=${query}`
-        );
-        if (!res.ok) throw new Error("Something went wrong!");
-        const data = await res.json();
-        if (data.Response === "False") throw new Error("Movie not found.");
-        setMovies(data.Search);
-        // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${Key}&s=${query}`
+          );
+          if (!res.ok) throw new Error("Something went wrong!");
+          const data = await res.json();
+          if (data.Response === "False") throw new Error("Movie not found.");
+          setMovies(data.Search);
+          // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-    fetchMovies();
-  }, []);
+      // now the api fetch wont work if the characters typed in seacrh bar are less than 3
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+
+      fetchMovies();
+    },
+    [query] //this tells to execute above effect when the query state is updated
+  );
 
   return (
     <>
       <Navbar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResult movies={movies} />
       </Navbar>
       <Main>
@@ -144,8 +156,7 @@ function Logo() {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
