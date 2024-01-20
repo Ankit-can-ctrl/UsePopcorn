@@ -59,7 +59,14 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const tempQuery = "avatar";
+  const [selectedId, setSelectedId] = useState(null);
+
+  function handleSelctedMovie(id) {
+    setSelectedId((selectedId) => (id === selectedId ? null : id));
+  }
+  function handleClose() {
+    setSelectedId(null);
+  }
 
   useEffect(
     function () {
@@ -74,6 +81,7 @@ export default function App() {
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not found.");
           setMovies(data.Search);
+          console.log(data.Search);
           // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
         } catch (err) {
           setError(err.message);
@@ -103,12 +111,20 @@ export default function App() {
         <Box>
           {/* {isLoading ? <Loader /> : <MoviesList movies={movies} />} */}
           {isLoading && <Loader />}
-          {!isLoading && !error && <MoviesList movies={movies} />}
+          {!isLoading && !error && (
+            <MoviesList movies={movies} AddSelctedMovie={handleSelctedMovie} />
+          )}
           {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedMovieList watched={watched} />
+          {selectedId ? (
+            <MoviesDetails selectedId={selectedId} AddCloseBtn={handleClose} />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedMovieList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -206,20 +222,35 @@ function Box({ children }) {
 //     </div>
 //   );
 // }
-
-function MoviesList({ movies }) {
+function MoviesDetails({ selectedId, AddCloseBtn }) {
   return (
-    <ul className="list">
+    <div className="details">
+      <button className="btn-back" onClick={AddCloseBtn}>
+        {/* this is a html entity stands for left arrow symbol */}
+        &larr;
+      </button>
+      <p>{selectedId}</p>
+    </div>
+  );
+}
+
+function MoviesList({ movies, AddSelctedMovie }) {
+  return (
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movies movie={movie} key={movie.imdbID} />
+        <Movies
+          movie={movie}
+          key={movie.imdbID}
+          AddSelctedMovie={AddSelctedMovie}
+        />
       ))}
     </ul>
   );
 }
 
-function Movies({ movie }) {
+function Movies({ movie, AddSelctedMovie }) {
   return (
-    <li>
+    <li onClick={() => AddSelctedMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
