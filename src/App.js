@@ -304,6 +304,11 @@ function MoviesDetails({
     function () {
       if (!title) return;
       document.title = `Movie | ${title}`;
+
+      // using a cleanup function
+      return function () {
+        document.title = "usePopcorn";
+      };
     },
     [title]
   );
