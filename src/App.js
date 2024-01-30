@@ -75,6 +75,8 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  // ==========================
   useEffect(
     function () {
       const controller = new AbortController();
@@ -94,7 +96,10 @@ export default function App() {
           setError("");
           // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
         } catch (err) {
-          if (err.name !== "AbortError") setError(err.message);
+          if (err.name !== "AbortError") {
+            console.log(err.message);
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -105,6 +110,8 @@ export default function App() {
         setError("");
         return;
       }
+      // to close the movie details if another movie is searched in the search bar
+      handleClose();
 
       fetchMovies();
       return function () {
@@ -289,6 +296,22 @@ function MoviesDetails({
     onAddWatch(newWatchedMovie);
     onclose();
   }
+  // Adding event listener to escape keypress
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onclose();
+        }
+      }
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onclose]
+  );
 
   useEffect(
     function () {
