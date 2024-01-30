@@ -77,21 +77,24 @@ export default function App() {
   }
   useEffect(
     function () {
+      const controller = new AbortController();
+
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${Key}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${Key}&s=${query}`,
+            { signal: controller.signal }
           );
           if (!res.ok) throw new Error("Something went wrong!");
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not found.");
           setMovies(data.Search);
-          console.log(data.Search);
+          setError("");
           // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
         } catch (err) {
-          setError(err.message);
+          if (err.name !== "AbortError") setError(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -104,6 +107,9 @@ export default function App() {
       }
 
       fetchMovies();
+      return function () {
+        controller.abort();
+      };
     },
     [query] //this tells to execute above effect when the query state is updated
   );
