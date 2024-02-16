@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import userEvent from "@testing-library/user-event";
 
 const tempMovieData = [
   {
@@ -215,6 +216,26 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  const inputEl = useRef(null);
+  // selecting the search bar when pressing the enter button i.e the keypress event
+  useEffect(
+    function () {
+      function callback(e) {
+        if (document.activeElement === inputEl.current) return;
+        if (e.code === "Enter") {
+          // this will make the search bar automatically selected on the page mount
+          inputEl.current.focus();
+          // this will clear the seacrh bar when pressed enter while a movie is selected
+          setQuery("");
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [setQuery]
+  );
+
   return (
     <input
       className="search"
@@ -222,6 +243,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 }
@@ -277,6 +299,15 @@ function MoviesDetails({
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
 
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (userRating) countRef.current++;
+    },
+    [userRating]
+  );
+
   // to get the rating of the movie we've already watched using optional chaining method
   const WatchedUserRating = watched.find(
     (movie) => movie.imdbID === selectedId
@@ -305,6 +336,7 @@ function MoviesDetails({
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
+      countingTracker: countRef.current,
     };
     onAddWatch(newWatchedMovie);
     onclose();
