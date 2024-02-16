@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import userEvent from "@testing-library/user-event";
 
 const tempMovieData = [
   {
@@ -298,6 +299,15 @@ function MoviesDetails({
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
 
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (userRating) countRef.current++;
+    },
+    [userRating]
+  );
+
   // to get the rating of the movie we've already watched using optional chaining method
   const WatchedUserRating = watched.find(
     (movie) => movie.imdbID === selectedId
@@ -326,6 +336,7 @@ function MoviesDetails({
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
+      countingTracker: countRef.current,
     };
     onAddWatch(newWatchedMovie);
     onclose();
