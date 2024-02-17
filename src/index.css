@@ -54,8 +54,14 @@ body {
   max-width: 42rem;
   background-color: var(--color-background-500);
   border-radius: 0.9rem;
-  overflow: scroll;
+  overflow: hidden;
+  /* overflow-y: hidden; */
   position: relative;
+}
+.box:active,
+.box:hover,
+.box:focus {
+  overflow: scroll;
 }
 
 .loader {
@@ -138,8 +144,13 @@ body {
 .list {
   list-style: none;
   padding: 0.8rem 0;
-  overflow: scroll;
+  overflow: hidden;
 }
+/* .list:hover,
+.list:active,
+.list:focus {
+  overflow: scroll;
+} */
 
 .list-watched {
   height: calc(100% - 9rem);
@@ -281,6 +292,7 @@ body {
 }
 
 .rating {
+  width: fit-content;
   background-color: var(--color-background-100);
   border-radius: 0.9rem;
   padding: 2rem 2.4rem;

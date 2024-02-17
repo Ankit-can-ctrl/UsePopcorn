@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import userEvent from "@testing-library/user-event";
+import { useMovies } from "./useMovies";
 
 const tempMovieData = [
   {
@@ -57,9 +58,6 @@ const average = (arr) =>
 export default function App() {
   const [query, setQuery] = useState("");
 
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   // const [watched, setWatched] = useState([]);
   // now using a callback function to set the intial state for watched to access the localstorage data
@@ -90,50 +88,9 @@ export default function App() {
     [watched]
   );
 
+  const { movies, isLoading, error } = useMovies(query);
+
   // ==========================
-  useEffect(
-    function () {
-      const controller = new AbortController();
-
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError("");
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${Key}&s=${query}`,
-            { signal: controller.signal }
-          );
-          if (!res.ok) throw new Error("Something went wrong!");
-          const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found.");
-          setMovies(data.Search);
-          setError("");
-          // console.log(data);  //on running this code we found out what was the response in console when query is set to something that is not available response was "False"
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            console.log(err.message);
-            setError(err.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      // now the api fetch wont work if the characters typed in seacrh bar are less than 3
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-      // to close the movie details if another movie is searched in the search bar
-      handleClose();
-
-      fetchMovies();
-      return function () {
-        controller.abort();
-      };
-    },
-    [query] //this tells to execute above effect when the query state is updated
-  );
 
   return (
     <>
