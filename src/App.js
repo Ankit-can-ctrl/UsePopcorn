@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import userEvent from "@testing-library/user-event";
 import { useMovies } from "./useMovies";
+import { useLocalStorage } from "./useLocalStorage";
 
 const tempMovieData = [
   {
@@ -59,12 +60,12 @@ export default function App() {
   const [query, setQuery] = useState("");
 
   const [selectedId, setSelectedId] = useState(null);
-  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useLocalStorage([], "watched");
   // now using a callback function to set the intial state for watched to access the localstorage data
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
+  // const [watched, setWatched] = useState(function () {
+  //   const storedValue = localStorage.getItem("watched");
+  //   return JSON.parse(storedValue);
+  // });
 
   function handleSelctedMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -81,12 +82,12 @@ export default function App() {
   }
   // ==========================
   // storing data in local storage
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
+  // useEffect(
+  //   function () {
+  //     localStorage.setItem("watched", JSON.stringify(watched));
+  //   },
+  //   [watched]
+  // );
 
   const { movies, isLoading, error } = useMovies(query);
 
